@@ -1,0 +1,354 @@
+id: org.jellyfin.Jellyfin
+runtime: org.freedesktop.Sdk
+runtime-version: "22.08"
+sdk: org.freedesktop.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.dotnet6
+  - org.freedesktop.Sdk.Extension.node14
+  - org.freedesktop.Sdk.Extension.llvm15
+separate-locales: false
+command: jellyfin
+cleanup:
+  - /man
+  - /share/man
+finish-args:
+  - --device=dri
+  # - --device=all
+  - --share=network
+  # - --filesystem=host
+  - --filesystem=xdg-music:ro
+  - --filesystem=xdg-videos:ro
+  - --filesystem=xdg-download:ro
+
+modules:
+  - name: jellyfin-web
+    disabled: false
+    buildsystem: simple
+    build-options:
+      append-path: /usr/lib/sdk/node14/bin
+      build-args:
+        - --share=network
+      # env:
+      #   NPM_CONFIG_LOGLEVEL: info
+      #   XDG_CACHE_HOME: ${FLATPAK_BUILDER_BUILDDIR}/flatpak-node/cache
+      #   npm_config_cache: ${FLATPAK_BUILDER_BUILDDIR}/flatpak-node/npm-cache
+      #   npm_config_offline: 'true'
+    build-commands:
+      - npm ci --no-audit
+      # - npm ci --no-audit --offline
+      - mkdir -p $FLATPAK_DEST/bin/jellyfin-web
+      - cp -r dist/* $FLATPAK_DEST/bin/jellyfin-web
+    sources:
+      # - npm-generated-sources.json
+      - type: archive
+        url: https://github.com/jellyfin/jellyfin-web/archive/refs/tags/v10.8.8.tar.gz
+        sha256: e99ef3feff05444adbd1cb0dbc7f1a9312c47e676b623ee73ffbc634ee645f33
+
+  - name: jellyfin-ffmpeg
+    disabled: false
+    build-options:
+      append-path: /usr/lib/sdk/llvm15/bin
+      prepend-ld-library-path: /usr/lib/sdk/llvm15/lib
+      arch:
+        x86_64:
+          env:
+            EXTRA_OPTS: --enable-libmfx
+    buildsystem: simple
+    build-commands:
+      - cat debian/patches/*.patch | patch -Np1 -d .
+      - ./configure
+        --prefix="$FLATPAK_DEST/bin/jellyfin-ffmpeg"
+        --target-os=linux
+        --extra-version=Jellyfin
+        --disable-doc
+        --disable-ffplay
+        --disable-ptx-compression
+        --disable-shared
+        --disable-libxcb
+        --disable-sdl2
+        --disable-xlib
+        --enable-gpl
+        --enable-version3
+        --enable-static
+        --enable-gmp
+        --enable-gnutls
+        --enable-chromaprint
+        --enable-libfontconfig
+        --enable-libass
+        --enable-libbluray
+        --enable-libdrm
+        --enable-libfreetype
+        --enable-libfribidi
+        --enable-libmp3lame
+        --enable-libopus
+        --enable-libtheora
+        --enable-libvorbis
+        --enable-libdav1d
+        --enable-libwebp
+        --enable-libvpx
+        --enable-libx264
+        --enable-libx265
+        --enable-libzvbi
+        --enable-libzimg
+        --enable-libshaderc
+        --enable-libplacebo
+        --enable-vulkan
+        --enable-opencl
+        --enable-vaapi
+        --enable-amf
+        --enable-ffnvcodec
+        --enable-cuda
+        --enable-cuda-llvm
+        --enable-cuvid
+        --enable-nvdec
+        --enable-nvenc
+        ${EXTRA_OPTS}
+      - make -j$(nproc)
+      - install -Dm 755 ffmpeg $FLATPAK_DEST/bin/ffmpeg
+      - install -Dm 755 ffprobe $FLATPAK_DEST/bin/ffprobe
+    sources:
+      - type: archive
+        url: https://github.com/jellyfin/jellyfin-ffmpeg/archive/refs/tags/v5.1.2-6.tar.gz
+        sha256: d06e2ac46bbf5239e1c00fc02dd29a20c611dc76327b46ccca0fc65ebc3eda97
+    modules:
+      - name: chromaprint
+        buildsystem: cmake
+        sources:
+          - type: archive
+            url: http://archive.ubuntu.com/ubuntu/pool/universe/c/chromaprint/chromaprint_1.5.1.orig.tar.gz
+            md5: 54e71f86bcf1d34989db639044ba9628
+          - type: archive
+            url: http://archive.ubuntu.com/ubuntu/pool/universe/c/chromaprint/chromaprint_1.5.1-2build1.debian.tar.xz
+            md5: 9b6fc960acd8b77b801c201cbad10f72
+          - type: shell
+            commands:
+              - for n in $(cat patches/series); do if [[ $n != "#"* ]]; then patch -Np1 -i "patches/$n" -d .; fi; done
+      - name: libass
+        sources:
+          - type: archive
+            url: http://archive.ubuntu.com/ubuntu/pool/universe/liba/libass/libass_0.16.0.orig.tar.gz
+            md5: 52dfa5b9d1bf88fa662d5457d5e6e917
+          - type: archive
+            url: http://archive.ubuntu.com/ubuntu/pool/universe/liba/libass/libass_0.16.0-1.debian.tar.xz
+            md5: 49b1df5404f0cc408e183c1d1e09a187
+          - type: shell
+            commands:
+              - for n in $(cat patches/series); do if [[ $n != "#"* ]]; then patch -Np1 -i "patches/$n" -d .; fi; done
+      - name: libbluray
+        config-opts:
+          - --disable-bdjava-jar
+        sources:
+          - type: archive
+            url: http://archive.ubuntu.com/ubuntu/pool/universe/libb/libbluray/libbluray_1.3.2.orig.tar.bz2
+            md5: 8535cac9abdd03f59a64cb47994f45cb
+          - type: archive
+            url: http://archive.ubuntu.com/ubuntu/pool/universe/libb/libbluray/libbluray_1.3.2-1.debian.tar.xz
+            md5: 84850585acb1cc52753d01dfe444297e
+          - type: shell
+            commands:
+              - for n in $(cat patches/series); do if [[ $n != "#"* ]]; then patch -Np1 -i "patches/$n" -d .; fi; done
+      - name: intel-mediasdk
+        only-arches:
+        - x86_64
+        buildsystem: cmake
+        config-opts:
+          - -DBUILD_RUNTIME=OFF
+          - -DBUILD_SAMPLES=OFF
+          - -DBUILD_TESTS=OFF
+          - -DBUILD_TOOLS=OFF
+          - -DBUILD_TUTORIALS=OFF
+        sources:
+          - type: archive
+            url: http://archive.ubuntu.com/ubuntu/pool/universe/i/intel-mediasdk/intel-mediasdk_22.3.0.orig.tar.gz
+            md5: fa13626be0303c1e73e24bfe172a61a8
+          - type: archive
+            url: http://archive.ubuntu.com/ubuntu/pool/universe/i/intel-mediasdk/intel-mediasdk_22.3.0-1.debian.tar.xz
+            md5: bde364eb317266c0ac2908f72f1814c2
+          - type: shell
+            commands:
+              - for n in $(cat patches/series); do if [[ $n != "#"* ]]; then patch -Np1 -i "patches/$n" -d .; fi; done
+      - name: shaderc
+        # From MPV
+        buildsystem: cmake-ninja
+        builddir: true
+        config-opts:
+          - -DSHADERC_SKIP_COPYRIGHT_CHECK=ON
+          - -DSHADERC_SKIP_EXAMPLES=ON
+          - -DSHADERC_SKIP_TESTS=ON
+        cleanup:
+          - /bin
+          - /include
+          - /lib/cmake
+          - /lib/pkgconfig
+        post-install:
+          # copy libSPIRV, as it's only available in Sdk
+          - install -D /lib/$(gcc --print-multiarch)/libSPIRV*.so /app/lib
+        sources:
+          - type: archive
+            archive-type: tar
+            url: https://api.github.com/repos/google/shaderc/tarball/refs/tags/v2021.3
+            sha256: b7e54b23a83343d5e2da836d8833ae0db11926141955edf845e35d4dc1eb88d1
+          - type: shell
+            commands:
+              - sed -i 's|SPIRV/GlslangToSpv.h|glslang/SPIRV/GlslangToSpv.h|' libshaderc_util/src/compiler.cc
+              - sed -i 's|add_subdirectory(third_party)||' CMakeLists.txt
+              - sed -i 's|add_custom_target(build-version|set(NOT_USE|' CMakeLists.txt
+              - |
+                LIB=/lib/$(gcc --print-multiarch)
+                VER_MATCH="[0-9]+\.[^\. ]+"
+                SHADERC=$(grep -m1 -oP "^v$VER_MATCH" CHANGES)
+                SPIRV=v$(grep -oP "(?<=Version:.)$VER_MATCH" $LIB/pkgconfig/SPIRV-Tools-shared.pc)
+                GLSLANG=v$(realpath $LIB/libglslang.so | grep -oP "(?<=so.)$VER_MATCH")
+                cat <<- EOF > glslc/src/build-version.inc
+                  "shaderc $SHADERC"
+                  "spirv-tools $SPIRV"
+                  "glslang $GLSLANG"
+                EOF
+              - cat glslc/src/build-version.inc
+      - name: libplacebo
+        # Using lunar source for 22.08 SDK
+        buildsystem: meson
+        config-opts:
+          - -Dtests=false
+          - -Ddemos=false
+        sources:
+          # - type: archive
+          #   url: http://archive.ubuntu.com/ubuntu/pool/universe/libp/libplacebo/libplacebo_4.192.1.orig.tar.gz
+          #   md5: b6bbb69a7bcc170a5b937f284b564e8f
+          # - type: archive
+          #   url: http://archive.ubuntu.com/ubuntu/pool/universe/libp/libplacebo/libplacebo_4.192.1-1.debian.tar.xz
+          #   md5: e3df1c815eb7e6be1660e1aced36271b
+          - type: archive
+            url: http://archive.ubuntu.com/ubuntu/pool/universe/libp/libplacebo/libplacebo_4.208.0.orig.tar.gz
+            md5: 706e39e9c41a29d2daa5dbe58ff5c25e
+          - type: archive
+            url: http://archive.ubuntu.com/ubuntu/pool/universe/libp/libplacebo/libplacebo_4.208.0-3.debian.tar.xz
+            md5: 67ff9895dc3e0843eec370e1605648dd
+          - type: shell
+            commands:
+              - for n in $(cat patches/series); do if [[ $n != "#"* ]]; then patch -Np1 -i "patches/$n" -d .; fi; done
+      - name: x264
+        config-opts:
+          - --disable-cli
+          - --enable-shared
+        sources:
+          - type: archive
+            url: http://archive.ubuntu.com/ubuntu/pool/universe/x/x264/x264_0.164.3095+gitbaee400.orig.tar.gz
+            md5: a1ba15544de468bae862f5a6098d0038
+          - type: archive
+            url: http://archive.ubuntu.com/ubuntu/pool/universe/x/x264/x264_0.164.3095+gitbaee400-2build1.debian.tar.xz
+            md5: b9c1b03160cb531bfa0d24cb30c1a8a2
+          - type: shell
+            commands:
+              - for n in $(cat patches/series); do if [[ $n != "#"* ]]; then patch -Np1 -i "patches/$n" -d .; fi; done
+      - name: x265
+        # Does it need numa?
+        buildsystem: cmake-ninja
+        builddir: true
+        subdir: source
+        config-opts:
+          - -DCMAKE_BUILD_TYPE=Release
+          - -DENABLE_CLI=OFF
+        sources:
+          - type: archive
+            url: http://archive.ubuntu.com/ubuntu/pool/universe/x/x265/x265_3.5.orig.tar.gz
+            sha256: e70a3335cacacbba0b3a20ec6fecd6783932288ebc8163ad74bcc9606477cae8
+          - type: archive
+            url: http://archive.ubuntu.com/ubuntu/pool/universe/x/x265/x265_3.5-2.debian.tar.xz
+            md5: da1d33e85142b7dbfc12413cc9bb48e3
+          - type: shell
+            commands:
+              - for n in $(cat patches/series); do if [[ $n != "#"* ]]; then patch -Np1 -i "patches/$n" -d .; fi; done
+      - name: zimg
+        sources:
+          - type: archive
+            url: http://archive.ubuntu.com/ubuntu/pool/universe/z/zimg/zimg_3.0.4+ds1.orig.tar.xz
+            md5: b986bdf394fa2be18a632a739b81e96d
+          - type: archive
+            url: http://archive.ubuntu.com/ubuntu/pool/universe/z/zimg/zimg_3.0.4+ds1-1.debian.tar.xz
+            md5: 25975656874d0cb5d03347211dab461b
+          - type: shell
+            commands:
+              - for n in $(cat patches/series); do if [[ $n != "#"* ]]; then patch -Np1 -i "patches/$n" -d .; fi; done
+      - name: zvbi
+        sources:
+          - type: archive
+            url: http://archive.ubuntu.com/ubuntu/pool/universe/z/zvbi/zvbi_0.2.35.orig.tar.bz2
+            md5: 95e53eb208c65ba6667fd4341455fa27
+          - type: archive
+            url: http://archive.ubuntu.com/ubuntu/pool/universe/z/zvbi/zvbi_0.2.35-19.debian.tar.xz
+            md5: 2fecea2552d7fa0f1140bdaf76105c0f
+          - type: shell
+            commands:
+              - for n in $(cat patches/series); do if [[ $n != "#"* ]]; then patch -Np1 -i "patches/$n" -d .; fi; done
+      - name: khronos-opencl-headers
+        buildsystem: cmake
+        sources:
+          - type: archive
+            url: http://archive.ubuntu.com/ubuntu/pool/universe/k/khronos-opencl-headers/khronos-opencl-headers_3.0~2022.05.18.orig.tar.gz
+            md5: 24e6ec5d2df68db2a0c43c0ba100da07
+          - type: archive
+            url: http://archive.ubuntu.com/ubuntu/pool/universe/k/khronos-opencl-headers/khronos-opencl-headers_3.0~2022.05.18-1.debian.tar.xz
+            md5: 72790e310a025e667b8ed3422d6ae83c
+          - type: shell
+            commands:
+              - for n in $(cat patches/series); do if [[ $n != "#"* ]]; then patch -Np1 -i "patches/$n" -d .; fi; done
+      - name: nv-codec-headers
+        no-autogen: true
+        make-install-args:
+          - PREFIX=${FLATPAK_DEST}
+        cleanup:
+          - "*"
+        sources:
+          - type: archive
+            url: http://archive.ubuntu.com/ubuntu/pool/universe/n/nv-codec-headers/nv-codec-headers_11.1.5.1.orig.tar.gz
+            sha256: d095fbd56aa93772471a323be0ebe65504a0f43f06c76a30b6d25da77b06ae9c
+          - type: archive
+            url: http://archive.ubuntu.com/ubuntu/pool/universe/n/nv-codec-headers/nv-codec-headers_11.1.5.1-1.debian.tar.xz
+            md5: 41eeb7a961deaf234aeb9c5c1c78be6b
+          - type: shell
+            commands:
+              - for n in $(cat patches/series); do if [[ $n != "#"* ]]; then patch -Np1 -i "patches/$n" -d .; fi; done
+      - name: amf
+        buildsystem: simple
+        build-commands:
+          - mkdir -p $FLATPAK_DEST/include
+          - mv amf/public/include $FLATPAK_DEST/include/AMF
+        cleanup:
+          - "*"
+        sources:
+          - type: archive
+            url: https://github.com/GPUOpen-LibrariesAndSDKs/AMF/archive/refs/tags/v1.4.28.tar.gz
+            sha256: 22524c74ca47686a61e9d385b66bbb4735b680274f7c7d8ca3c3b6d2877ec00a
+
+  - name: jellyfin
+    disabled: false
+    buildsystem: simple
+    build-options:
+      append-ld-library-path: /usr/lib/sdk/dotnet6/lib
+      append-path: /usr/lib/sdk/dotnet6/bin
+      append-pkg-config-path: /usr/lib/sdk/dotnet6/lib/pkgconfig
+      build-args:
+        - --share=network
+      env:
+        DOTNET_CLI_TELEMETRY_OPTOUT: "true"
+      arch:
+        x86_64:
+          env:
+            RUNTIME: linux-x64
+        aarch64:
+          env:
+            RUNTIME: linux-arm64
+        arm:
+          env:
+            RUNTIME: linux-arm
+    build-commands:
+      - mkdir -p $FLATPAK_DEST/bin
+      # - dotnet publish -c Release --source ./nuget-sources --runtime $RUNTIME -p:DebugSymbols=false -p:DebugType=none --self-contained true Jellyfin.Server/Jellyfin.Server.csproj
+      - dotnet publish -c Release --runtime $RUNTIME -p:DebugSymbols=false -p:DebugType=none --self-contained true Jellyfin.Server/Jellyfin.Server.csproj
+      - cp -r --remove-destination $FLATPAK_BUILDER_BUILDDIR/Jellyfin.Server/bin/Release/net6.0/$RUNTIME/publish/* $FLATPAK_DEST/bin/
+    sources:
+      - type: archive
+        url: https://github.com/jellyfin/jellyfin/archive/refs/tags/v10.8.8.tar.gz
+        sha256: 449c125ede4104638b454b8eb7870ee48b0a40028a141719c7d3537240a46741
+      # - nuget-generated-sources.json
