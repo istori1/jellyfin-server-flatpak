@@ -22,7 +22,7 @@ finish-args:
 
 modules:
   - name: jellyfin-web
-    disabled: false
+    disabled: true
     buildsystem: simple
     build-options:
       append-path: /usr/lib/sdk/node14/bin
@@ -45,7 +45,7 @@ modules:
         sha256: e99ef3feff05444adbd1cb0dbc7f1a9312c47e676b623ee73ffbc634ee645f33
 
   - name: jellyfin-ffmpeg
-    disabled: false
+    disabled: true
     build-options:
       append-path: /usr/lib/sdk/llvm15/bin
       prepend-ld-library-path: /usr/lib/sdk/llvm15/lib
