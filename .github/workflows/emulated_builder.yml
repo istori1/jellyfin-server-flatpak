@@ -15,7 +15,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Setup Dependencies Linux Flatpak
+      - name: Setup Dependencies
         run: |
           sudo apt update -y
           sudo apt install flatpak qemu-user-static -y
