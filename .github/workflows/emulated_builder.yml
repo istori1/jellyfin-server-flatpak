@@ -28,7 +28,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: .flatpak-builder
-          key: flatpak-${{ github.sha }}
+          key: flatpak-aarch64-${{ github.sha }}
           restore-keys: |
             flatpak
 
@@ -36,8 +36,8 @@ jobs:
         run: |
           sudo su $(whoami) -c 'flatpak run org.flatpak.Builder --user --arch=aarch64 --repo=repo --force-clean build org.jellyfin.Jellyfin.yml'
           mkdir artifacts
-          sudo su $(whoami) -c 'flatpak build-bundle ./repo artifacts/jellyfin.flatpak org.jellyfin.Jellyfin'
-          sudo su $(whoami) -c 'flatpak build-bundle --runtime ./repo artifacts/jellyfin_debug.flatpak org.jellyfin.Jellyfin.Debug'
+          sudo su $(whoami) -c 'flatpak build-bundle ./repo artifacts/jellyfin_aarch64.flatpak org.jellyfin.Jellyfin'
+          sudo su $(whoami) -c 'flatpak build-bundle --runtime ./repo artifacts/jellyfin_debug_aarch64.flatpak org.jellyfin.Jellyfin.Debug'
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v3
