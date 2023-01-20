@@ -15,7 +15,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Setup Dependencies Linux Flatpak
+      - name: Setup Dependencies
         run: |
           sudo apt update -y
           sudo apt install flatpak -y
@@ -36,8 +36,8 @@ jobs:
         run: |
           sudo su $(whoami) -c 'flatpak run org.flatpak.Builder --user --repo=repo --force-clean build org.jellyfin.Jellyfin.yml'
           mkdir artifacts
-          sudo su $(whoami) -c 'flatpak build-bundle ./repo artifacts/jellyfin_x86_64.flatpak org.jellyfin.Jellyfin'
-          sudo su $(whoami) -c 'flatpak build-bundle --runtime ./repo artifacts/jellyfin_debug_x86_64.flatpak org.jellyfin.Jellyfin.Debug'
+          sudo su $(whoami) -c 'flatpak build-bundle ./repo artifacts/jellyfin_$(uname -m).flatpak org.jellyfin.Jellyfin'
+          sudo su $(whoami) -c 'flatpak build-bundle --runtime ./repo artifacts/jellyfin_debug_$(uname -m).flatpak org.jellyfin.Jellyfin.Debug'
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v3
