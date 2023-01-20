@@ -1,0 +1,46 @@
+name: Emulated Builder
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build_native_flatpak:
+    name: Build Emulated Arch Flatpak
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Dependencies Linux Flatpak
+        run: |
+          sudo apt update -y
+          sudo apt install flatpak qemu-user-static -y
+          sudo su $(whoami) -c 'flatpak --user remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo'
+          sudo su $(whoami) -c 'flatpak --user install flathub org.flatpak.Builder org.freedesktop.Sdk/aarch64/22.08 \
+          org.freedesktop.Sdk.Extension.dotnet6/aarch64/22.08 org.freedesktop.Sdk.Extension.node14/aarch64/22.08 \
+          org.freedesktop.Sdk.Extension.llvm15/aarch64/22.08 -y'
+
+      - name: Cache Build
+        uses: actions/cache@v3
+        with:
+          path: .flatpak-builder
+          key: flatpak-${{ github.sha }}
+          restore-keys: |
+            flatpak
+
+      - name: Build Native Flatpak
+        run: |
+          sudo su $(whoami) -c 'flatpak run org.flatpak.Builder --user --arch=aarch64 --repo=repo --force-clean build org.jellyfin.Jellyfin.yml'
+          mkdir artifacts
+          sudo su $(whoami) -c 'flatpak build-bundle ./repo artifacts/jellyfin.flatpak org.jellyfin.Jellyfin'
+          sudo su $(whoami) -c 'flatpak build-bundle --runtime ./repo artifacts/jellyfin_debug.flatpak org.jellyfin.Jellyfin.Debug'
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: jellyfin-flatpak
+          path: artifacts
