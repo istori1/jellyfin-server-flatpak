@@ -13,9 +13,11 @@ cleanup:
   - /share/man
 finish-args:
   - --device=dri
-  # - --device=all
   - --share=network
-  # - --filesystem=host
+  # - --filesystem=host:ro
+  - --filesystem=/mnt:ro
+  - --filesystem=/media:ro
+  - --filesystem=/run/media:ro
   - --filesystem=xdg-music:ro
   - --filesystem=xdg-videos:ro
   - --filesystem=xdg-download:ro
@@ -213,12 +215,6 @@ modules:
           - -Dtests=false
           - -Ddemos=false
         sources:
-          # - type: archive
-          #   url: http://archive.ubuntu.com/ubuntu/pool/universe/libp/libplacebo/libplacebo_4.192.1.orig.tar.gz
-          #   sha256: e6c5805cf4d955b5941dd12b00fe157b61e77995bc1786b9a86df0ca99a0edc4
-          # - type: archive
-          #   url: http://archive.ubuntu.com/ubuntu/pool/universe/libp/libplacebo/libplacebo_4.192.1-1.debian.tar.xz
-          #   sha256: 60de94e38d48ad1ef22e713a5e64f9a3d97a30614c4b681368112a9607480f14
           - type: archive
             url: http://archive.ubuntu.com/ubuntu/pool/universe/libp/libplacebo/libplacebo_4.208.0.orig.tar.gz
             sha256: 7b3c857934ee3d30f743e43d7f0606e10950806661ea0ea385f8a1f06cbab854
@@ -274,12 +270,6 @@ modules:
       - name: zvbi
         # Using lunar source for 22.08 SDK in aarch64
         sources:
-          # - type: archive
-          #   url: http://archive.ubuntu.com/ubuntu/pool/universe/z/zvbi/zvbi_0.2.35.orig.tar.bz2
-          #   sha256: fc883c34111a487c4a783f91b1b2bb5610d8d8e58dcba80c7ab31e67e4765318
-          # - type: archive
-          #   url: http://archive.ubuntu.com/ubuntu/pool/universe/z/zvbi/zvbi_0.2.35-19.debian.tar.xz
-          #   sha256: a96b9b9b58afe824a0a4e0d5b5f3ab9f61659c1e222de2d16d3c8ae409f42791
           - type: archive
             url: http://archive.ubuntu.com/ubuntu/pool/universe/z/zvbi/zvbi_0.2.39.orig.tar.gz
             sha256: 290e44835af02159be6a2f670f3f0232a5da89ad27eaa2eab2d9ef3ba04a4bd1
@@ -336,8 +326,6 @@ modules:
       append-ld-library-path: /usr/lib/sdk/dotnet6/lib
       append-path: /usr/lib/sdk/dotnet6/bin
       append-pkg-config-path: /usr/lib/sdk/dotnet6/lib/pkgconfig
-      build-args:
-        - --share=network
       env:
         DOTNET_CLI_TELEMETRY_OPTOUT: "true"
       arch:
@@ -347,16 +335,13 @@ modules:
         aarch64:
           env:
             RUNTIME: linux-arm64
-        arm:
-          env:
-            RUNTIME: linux-arm
     build-commands:
       - mkdir -p $FLATPAK_DEST/bin
-      # - dotnet publish -c Release --source ./nuget-sources --runtime $RUNTIME -p:DebugSymbols=false -p:DebugType=none --self-contained true Jellyfin.Server/Jellyfin.Server.csproj
-      - dotnet publish -c Release --runtime $RUNTIME -p:DebugSymbols=false -p:DebugType=none --self-contained true Jellyfin.Server/Jellyfin.Server.csproj
-      - cp -r --remove-destination $FLATPAK_BUILDER_BUILDDIR/Jellyfin.Server/bin/Release/net6.0/$RUNTIME/publish/* $FLATPAK_DEST/bin/
+      - dotnet publish -c Release --source ./nuget-sources --output="$FLATPAK_DEST/bin" --runtime $RUNTIME
+        -p:DebugSymbols=false -p:DebugType=none --self-contained true Jellyfin.Server/Jellyfin.Server.csproj
     sources:
-      # - nuget-generated-sources.json
+      - nuget-generated-sources-x64.json
+      - nuget-generated-sources-arm64.json
       - type: archive
         url: https://github.com/jellyfin/jellyfin/archive/refs/tags/v10.8.8.tar.gz
         sha256: 449c125ede4104638b454b8eb7870ee48b0a40028a141719c7d3537240a46741
