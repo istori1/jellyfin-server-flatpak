@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build_native_flatpak:
+  build_emulated_flatpak:
     name: Build Emulated Arch Flatpak
     runs-on: ubuntu-22.04
     steps:
@@ -32,12 +32,12 @@ jobs:
           restore-keys: |
             flatpak
 
-      - name: Build Native Flatpak
+      - name: Build Emulated Flatpak
         run: |
           sudo su $(whoami) -c 'flatpak run org.flatpak.Builder --user --arch=aarch64 --repo=repo --force-clean build org.jellyfin.Jellyfin.yml'
           mkdir artifacts
-          sudo su $(whoami) -c 'flatpak build-bundle ./repo artifacts/jellyfin_aarch64.flatpak org.jellyfin.Jellyfin'
-          sudo su $(whoami) -c 'flatpak build-bundle --runtime ./repo artifacts/jellyfin_debug_aarch64.flatpak org.jellyfin.Jellyfin.Debug'
+          sudo su $(whoami) -c 'flatpak build-bundle --arch=aarch64 ./repo artifacts/jellyfin_aarch64.flatpak org.jellyfin.Jellyfin'
+          sudo su $(whoami) -c 'flatpak build-bundle --arch=aarch64 --runtime ./repo artifacts/jellyfin_debug_aarch64.flatpak org.jellyfin.Jellyfin.Debug'
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v3
