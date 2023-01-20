@@ -14,4 +14,8 @@ Setup Flatpak on your distro https://flatpak.org/setup/
 
 `flatpak run org.flatpak.Builder --user --install --install-deps-from=flathub-user --force-clean build org.jellyfin.Jellyfin.yml`
 
+*If you want to test how much time it takes to build on your hardware run this command instead*
+
+`time flatpak run org.flatpak.Builder --user --install --install-deps-from=flathub-user --disable-cache --force-clean build org.jellyfin.Jellyfin.yml`
+
 `flatpak run org.jellyfin.Jellyfin`
