@@ -38,8 +38,8 @@ modules:
     build-commands:
       - npm ci --no-audit
       # - npm ci --no-audit --offline
-      # - mkdir -p $FLATPAK_DEST/bin/jellyfin-web
-      # - cp -r dist/* $FLATPAK_DEST/bin/jellyfin-web
+      - mkdir -p $FLATPAK_DEST/bin/jellyfin-web
+      - cp -r dist/* $FLATPAK_DEST/bin/jellyfin-web
     sources:
       # - npm-generated-sources.json
       - type: archive
