@@ -52,7 +52,9 @@ modules:
       arch:
         x86_64:
           env:
-            EXTRA_OPTS: --enable-libmfx
+            # intel-mediasdk (libmfx) only supports x86_64
+            # Flatpak's LLVM is missing NVPTX support for aarch64
+            EXTRA_OPTS: --enable-libmfx --enable-cuda-llvm
     buildsystem: simple
     build-commands:
       - cat debian/patches/*.patch | patch -Np1 -d .
@@ -98,7 +100,6 @@ modules:
         --enable-amf
         --enable-ffnvcodec
         --enable-cuda
-        --enable-cuda-llvm
         --enable-cuvid
         --enable-nvdec
         --enable-nvenc
@@ -149,7 +150,7 @@ modules:
               - for n in $(cat patches/series); do if [[ $n != "#"* ]]; then patch -Np1 -i "patches/$n" -d .; fi; done
       - name: intel-mediasdk
         only-arches:
-        - x86_64
+          - x86_64
         buildsystem: cmake
         config-opts:
           - -DBUILD_RUNTIME=OFF
@@ -271,13 +272,20 @@ modules:
             commands:
               - for n in $(cat patches/series); do if [[ $n != "#"* ]]; then patch -Np1 -i "patches/$n" -d .; fi; done
       - name: zvbi
+        # Using lunar source for 22.08 SDK in aarch64
         sources:
+          # - type: archive
+          #   url: http://archive.ubuntu.com/ubuntu/pool/universe/z/zvbi/zvbi_0.2.35.orig.tar.bz2
+          #   md5: 95e53eb208c65ba6667fd4341455fa27
+          # - type: archive
+          #   url: http://archive.ubuntu.com/ubuntu/pool/universe/z/zvbi/zvbi_0.2.35-19.debian.tar.xz
+          #   md5: 2fecea2552d7fa0f1140bdaf76105c0f
           - type: archive
-            url: http://archive.ubuntu.com/ubuntu/pool/universe/z/zvbi/zvbi_0.2.35.orig.tar.bz2
-            md5: 95e53eb208c65ba6667fd4341455fa27
+            url: http://archive.ubuntu.com/ubuntu/pool/universe/z/zvbi/zvbi_0.2.39.orig.tar.gz
+            md5: ee891d4d59fc5ffe3ebf6d04cbc4fe73
           - type: archive
-            url: http://archive.ubuntu.com/ubuntu/pool/universe/z/zvbi/zvbi_0.2.35-19.debian.tar.xz
-            md5: 2fecea2552d7fa0f1140bdaf76105c0f
+            url: http://archive.ubuntu.com/ubuntu/pool/universe/z/zvbi/zvbi_0.2.39-2.debian.tar.xz
+            md5: 244bb0ddd5aedb952ea96bf105e4d645
           - type: shell
             commands:
               - for n in $(cat patches/series); do if [[ $n != "#"* ]]; then patch -Np1 -i "patches/$n" -d .; fi; done
@@ -348,7 +356,7 @@ modules:
       - dotnet publish -c Release --runtime $RUNTIME -p:DebugSymbols=false -p:DebugType=none --self-contained true Jellyfin.Server/Jellyfin.Server.csproj
       - cp -r --remove-destination $FLATPAK_BUILDER_BUILDDIR/Jellyfin.Server/bin/Release/net6.0/$RUNTIME/publish/* $FLATPAK_DEST/bin/
     sources:
+      # - nuget-generated-sources.json
       - type: archive
         url: https://github.com/jellyfin/jellyfin/archive/refs/tags/v10.8.8.tar.gz
         sha256: 449c125ede4104638b454b8eb7870ee48b0a40028a141719c7d3537240a46741
-      # - nuget-generated-sources.json
