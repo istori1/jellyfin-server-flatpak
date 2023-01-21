@@ -296,7 +296,7 @@ modules:
             url: https://github.com/GPUOpen-LibrariesAndSDKs/AMF/archive/refs/tags/v1.4.28.tar.gz
             sha256: 22524c74ca47686a61e9d385b66bbb4735b680274f7c7d8ca3c3b6d2877ec00a
 
-  - name: jellyfin-web
+  - name: jellyfin-web-portable
     disabled: false
     buildsystem: simple
     build-commands:
