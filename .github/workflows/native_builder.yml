@@ -42,5 +42,5 @@ jobs:
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: jellyfin-flatpak
+          name: jellyfin-x86_64-flatpak
           path: artifacts
