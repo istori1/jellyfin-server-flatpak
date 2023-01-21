@@ -23,29 +23,6 @@ finish-args:
   - --filesystem=xdg-download:ro
 
 modules:
-  - name: jellyfin-web
-    disabled: false
-    buildsystem: simple
-    build-options:
-      append-path: /usr/lib/sdk/node14/bin
-      build-args:
-        - --share=network
-      # env:
-      #   NPM_CONFIG_LOGLEVEL: info
-      #   XDG_CACHE_HOME: ${FLATPAK_BUILDER_BUILDDIR}/flatpak-node/cache
-      #   npm_config_cache: ${FLATPAK_BUILDER_BUILDDIR}/flatpak-node/npm-cache
-      #   npm_config_offline: 'true'
-    build-commands:
-      - npm ci --no-audit
-      # - npm ci --no-audit --offline
-      - mkdir -p $FLATPAK_DEST/bin/jellyfin-web
-      - cp -r dist/* $FLATPAK_DEST/bin/jellyfin-web
-    sources:
-      # - npm-generated-sources.json
-      - type: archive
-        url: https://github.com/jellyfin/jellyfin-web/archive/refs/tags/v10.8.8.tar.gz
-        sha256: e99ef3feff05444adbd1cb0dbc7f1a9312c47e676b623ee73ffbc634ee645f33
-
   - name: jellyfin-ffmpeg
     disabled: false
     build-options:
@@ -318,6 +295,39 @@ modules:
           - type: archive
             url: https://github.com/GPUOpen-LibrariesAndSDKs/AMF/archive/refs/tags/v1.4.28.tar.gz
             sha256: 22524c74ca47686a61e9d385b66bbb4735b680274f7c7d8ca3c3b6d2877ec00a
+
+  - name: jellyfin-web
+    disabled: false
+    buildsystem: simple
+    build-commands:
+      - mkdir -p $FLATPAK_DEST/bin/jellyfin-web
+      - cp -r . $FLATPAK_DEST/bin/jellyfin-web
+    sources:
+      - type: archive
+        url: https://repo.jellyfin.org/releases/server/linux/versions/stable/web/10.8.8/jellyfin-web_10.8.8_portable.tar.gz
+        sha256: 00d371de5420f1558f7bc69ed94cf2f7dd7d882cf8866b34e2a1daaa0b5e9114
+
+  - name: jellyfin-web-npm
+    disabled: true
+    buildsystem: simple
+    build-options:
+      append-path: /usr/lib/sdk/node14/bin
+      build-args:
+        - --share=network
+      env:
+        XDG_CACHE_HOME: ${FLATPAK_BUILDER_BUILDDIR}/flatpak-node/cache
+        npm_config_cache: ${FLATPAK_BUILDER_BUILDDIR}/flatpak-node/npm-cache
+    build-commands:
+      # - npm cache verify
+      # - npm ci --no-audit --offline
+      - npm ci --no-audit
+      - mkdir -p $FLATPAK_DEST/bin/jellyfin-web
+      - cp -r dist/* $FLATPAK_DEST/bin/jellyfin-web
+    sources:
+      # - npm-generated-sources.json
+      - type: archive
+        url: https://github.com/jellyfin/jellyfin-web/archive/refs/tags/v10.8.8.tar.gz
+        sha256: e99ef3feff05444adbd1cb0dbc7f1a9312c47e676b623ee73ffbc634ee645f33
 
   - name: jellyfin
     disabled: false
