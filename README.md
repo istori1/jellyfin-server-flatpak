@@ -24,4 +24,4 @@ Setup Flatpak on your distro https://flatpak.org/setup/
 
 <br><br>Run Jellyfin with `flatpak run org.jellyfin.Jellyfin`
 
-Support this effort via sats at the following adress `boost2222@getalby.com`. Thanks for your support.
+Support this effort via sats at the following address `boost2222@getalby.com`. Thanks for your support.
