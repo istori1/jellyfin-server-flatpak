@@ -1,5 +1,7 @@
 # Jellyfin Server Flatpak
 
+ <img src="https://github.com/istori1/jellyfin-server-flatpak/raw/main/localhost_8096.png" alt="Dashboard" width="400" height="350"> 
+
 Local Build Steps (may take 30 minutes or more)
 
 Building for Flatpak is WIP. The purpose of local building is to test and report issues. If you have a GitHub account you can also download the builds produced by GitHub Actions.
