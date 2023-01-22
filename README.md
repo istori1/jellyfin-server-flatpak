@@ -27,3 +27,7 @@ Setup Flatpak on your distro https://flatpak.org/setup/
 <br><br>Run Jellyfin with `flatpak run org.jellyfin.Jellyfin`
 
 Support the creation of this flatpak via sats at the following lightning address `⚡️ boost2222@getalby.com`. Thanks for your support.
+
+With pre-release files install by
+
+`flatpak install --user path/to/downloaded/file.flatpak`
