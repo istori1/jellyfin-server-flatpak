@@ -19,7 +19,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            .local/share/flatpak
+            ~/.local/share/flatpak
             .flatpak-builder
           key: flatpak-x86_64-${{ github.sha }}
           restore-keys: |
