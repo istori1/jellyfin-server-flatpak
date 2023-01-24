@@ -295,6 +295,7 @@ modules:
             sha256: 22524c74ca47686a61e9d385b66bbb4735b680274f7c7d8ca3c3b6d2877ec00a
       - name: svt-av1
         buildsystem: cmake
+        builddir: true
         sources:
           - type: archive
             url: http://archive.ubuntu.com/ubuntu/pool/universe/s/svt-av1/svt-av1_1.2.1+dfsg.orig.tar.xz
