@@ -19,7 +19,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            .local/share/flatpak
+            ~/.local/share/flatpak
             .flatpak-builder
           key: flatpak-x86_64-${{ github.sha }}
           restore-keys: |
@@ -29,8 +29,8 @@ jobs:
         run: |
           sudo apt update -y
           sudo apt install flatpak qemu-user-static -y
-          sudo su $(whoami) -c 'flatpak --user remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo'
-          sudo su $(whoami) -c 'flatpak --user install flathub org.flatpak.Builder org.freedesktop.Sdk/aarch64/22.08 \
+          sudo su $(whoami) -c 'flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo'
+          sudo su $(whoami) -c 'flatpak install --user flathub org.flatpak.Builder org.freedesktop.Sdk/aarch64/22.08 \
           org.freedesktop.Sdk.Extension.dotnet6/aarch64/22.08 org.freedesktop.Sdk.Extension.node14/aarch64/22.08 \
           org.freedesktop.Sdk.Extension.llvm15/aarch64/22.08 -y'
 
