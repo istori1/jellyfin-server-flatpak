@@ -30,10 +30,8 @@ modules:
       append-ld-library-path: /usr/lib/sdk/llvm15/lib
       arch:
         x86_64:
-          # Flatpak's LLVM does not yet support NVPTX for aarch64
           # intel-mediasdk (libmfx) only supports x86_64
           config-opts:
-            - --enable-cuda-llvm
             - --enable-libmfx
     config-opts:
       - --disable-doc
@@ -46,6 +44,7 @@ modules:
       - --enable-amf
       - --enable-chromaprint
       - --enable-cuda
+      - --enable-cuda-llvm
       - --enable-cuvid
       - --enable-ffnvcodec
       - --enable-gmp
