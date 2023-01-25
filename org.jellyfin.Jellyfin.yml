@@ -1,5 +1,5 @@
 id: org.jellyfin.Jellyfin
-runtime: org.freedesktop.Sdk
+runtime: org.freedesktop.Platform
 runtime-version: "22.08"
 sdk: org.freedesktop.Sdk
 sdk-extensions:
@@ -131,10 +131,7 @@ modules:
           - x86_64
         buildsystem: cmake
         config-opts:
-          - -DBUILD_RUNTIME=OFF
           - -DBUILD_SAMPLES=OFF
-          - -DBUILD_TESTS=OFF
-          - -DBUILD_TOOLS=OFF
           - -DBUILD_TUTORIALS=OFF
         sources:
           - type: archive
