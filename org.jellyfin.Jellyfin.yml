@@ -15,19 +15,21 @@ finish-args:
   - --device=dri
   - --share=network
   # - --filesystem=host:ro
+  # - --filesystem=home:ro
   - --filesystem=/mnt:ro
   - --filesystem=/media:ro
   - --filesystem=/run/media:ro
   - --filesystem=xdg-music:ro
   - --filesystem=xdg-videos:ro
-  - --filesystem=xdg-download:ro
+  # - --filesystem=xdg-download:ro
+  # - --filesystem=xdg-pictures:ro
 
 modules:
   - name: jellyfin-ffmpeg
     disabled: false
     build-options:
       append-path: /usr/lib/sdk/llvm15/bin
-      append-ld-library-path: /usr/lib/sdk/llvm15/lib
+      prepend-ld-library-path: /usr/lib/sdk/llvm15/lib
       arch:
         x86_64:
           # intel-mediasdk (libmfx) only supports x86_64
