@@ -21,7 +21,7 @@ jobs:
           path: |
             ~/.local/share/flatpak
             .flatpak-builder
-          key: flatpak-x86_64-${{ github.sha }}
+          key: flatpak-aarch64-${{ github.sha }}
           restore-keys: |
             flatpak
 
