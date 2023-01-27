@@ -8,9 +8,14 @@ sdk-extensions:
   - org.freedesktop.Sdk.Extension.llvm15
 separate-locales: false
 command: jellyfin
+
 cleanup:
+  # - /include
+  # - /lib/cmake
+  # - /lib/pkgconfig
   - /man
   - /share/man
+
 finish-args:
   - --device=dri
   - --share=network
@@ -32,9 +37,8 @@ modules:
       prepend-ld-library-path: /usr/lib/sdk/llvm15/lib
       arch:
         x86_64:
-          # intel-mediasdk (libmfx) only supports x86_64
           config-opts:
-            - --enable-libmfx
+            - --enable-libmfx # intel-mediasdk
     config-opts:
       - --disable-doc
       - --disable-ffplay
@@ -90,8 +94,47 @@ modules:
         commands:
           - for n in $(cat debian/patches/series); do if [[ $n != "#"* ]]; then patch -Np1 -i "debian/patches/$n" -d .; fi; done
     modules:
+      - name: fftw3
+        build-options:
+        arch:
+          x86_64:
+            config-opts:
+              - --enable-sse2
+              - --enable-avx
+              - --enable-avx-128-fma
+              - --enable-avx2
+              - --enable-avx512
+          aarch64:
+            config-opts:
+              - --enable-neon
+        config-opts:
+          - --disable-static
+          - --disable-doc
+          - --enable-shared
+          - --enable-single
+          - --enable-threads
+          - --enable-fortran
+          - --with-our-malloc
+          - --with-combined-threads
+          - --with-incoming-stack-boundary=2
+        sources:
+          - type: archive
+            url: http://archive.ubuntu.com/ubuntu/pool/main/f/fftw3/fftw3_3.3.8.orig.tar.gz
+            sha256: 6113262f6e92c5bd474f2875fa1b01054c4ad5040f6b0da7c03c98821d9ae303
+          - type: archive
+            url: http://archive.ubuntu.com/ubuntu/pool/main/f/fftw3/fftw3_3.3.8-2ubuntu8.debian.tar.xz
+            sha256: 2bddf40b42383167b221d7adfc7937b102b366053c3e6055f3864fb7b98c3050
+          - type: shell
+            commands:
+              - for n in $(cat patches/series); do if [[ $n != "#"* ]]; then patch -Np1 -i "patches/$n" -d .; fi; done
       - name: chromaprint
         buildsystem: cmake
+        config-opts:
+          - -DCMAKE_BUILD_TYPE=Release
+          - -DBUILD_SHARED_LIBS=ON
+          - -DBUILD_TOOLS=OFF
+          - -DBUILD_TESTS=OFF
+          - -DFFT_LIB=fftw3f
         sources:
           - type: archive
             url: http://archive.ubuntu.com/ubuntu/pool/universe/c/chromaprint/chromaprint_1.5.1.orig.tar.gz
@@ -133,6 +176,7 @@ modules:
         config-opts:
           - -DBUILD_SAMPLES=OFF
           - -DBUILD_TUTORIALS=OFF
+          - -DENABLE_X11=OFF
         sources:
           - type: archive
             url: http://archive.ubuntu.com/ubuntu/pool/universe/i/intel-mediasdk/intel-mediasdk_22.3.0.orig.tar.gz
@@ -143,27 +187,45 @@ modules:
           - type: shell
             commands:
               - for n in $(cat patches/series); do if [[ $n != "#"* ]]; then patch -Np1 -i "patches/$n" -d .; fi; done
+      - name: onevpl
+        only-arches:
+          - x86_64
+        buildsystem: cmake
+        config-opts:
+          - -DBUILD_TOOLS=OFF
+          - -DBUILD_TESTS=OFF
+          - -DBUILD_EXAMPLES=OFF
+          - -DINSTALL_EXAMPLE_CODE=OFF
+        sources:
+          - type: archive
+            url: http://archive.ubuntu.com/ubuntu/pool/universe/o/onevpl/onevpl_2022.1.0.orig.tar.xz
+            sha256: ad8c3a11f0d1cb8bd82f0d165467f5758d6238ef596d9830ffb7f810a7da4ec2
+          - type: archive
+            url: http://archive.ubuntu.com/ubuntu/pool/universe/o/onevpl/onevpl_2022.1.0-2.debian.tar.xz
+            sha256: b5a14bd2f0c90426a3ff8e407c75c6e9fc4e7433efa0b85d7fad2b0b52852534
+          - type: shell
+            commands:
+              - for n in $(cat patches/series); do if [[ $n != "#"* ]]; then patch -Np1 -i "patches/$n" -d .; fi; done
       - name: shaderc
-        # From MPV
         buildsystem: cmake-ninja
         builddir: true
         config-opts:
-          - -DSHADERC_SKIP_COPYRIGHT_CHECK=ON
-          - -DSHADERC_SKIP_EXAMPLES=ON
+          - -DCMAKE_BUILD_TYPE=Release
           - -DSHADERC_SKIP_TESTS=ON
+          - -DSHADERC_SKIP_EXAMPLES=ON
+          - -DSHADERC_SKIP_COPYRIGHT_CHECK=ON
+          - -DBUILD_SHARED_LIBS=OFF
         cleanup:
           - /bin
           - /include
           - /lib/cmake
           - /lib/pkgconfig
         post-install:
-          # copy libSPIRV, as it's only available in Sdk
           - install -D /lib/$(gcc --print-multiarch)/libSPIRV*.so /app/lib
         sources:
           - type: archive
-            archive-type: tar
-            url: https://api.github.com/repos/google/shaderc/tarball/refs/tags/v2021.3
-            sha256: b7e54b23a83343d5e2da836d8833ae0db11926141955edf845e35d4dc1eb88d1
+            url: https://github.com/google/shaderc/archive/refs/tags/v2022.2.tar.gz
+            sha256: 517d36937c406858164673db696dc1d9c7be7ef0960fbf2965bfef768f46b8c0
           - type: shell
             commands:
               - sed -i 's|SPIRV/GlslangToSpv.h|glslang/SPIRV/GlslangToSpv.h|' libshaderc_util/src/compiler.cc
@@ -185,8 +247,15 @@ modules:
         # Using lunar source for 22.08 SDK
         buildsystem: meson
         config-opts:
-          - -Dtests=false
+          - --buildtype=release
+          - --default-library=shared
+          - -Dvulkan=enabled
+          - -Dshaderc=enabled
+          - -Dglslang=disabled
           - -Ddemos=false
+          - -Dtests=false
+          - -Dbench=false
+          - -Dfuzz=false
         sources:
           - type: archive
             url: http://archive.ubuntu.com/ubuntu/pool/universe/libp/libplacebo/libplacebo_4.208.0.orig.tar.gz
@@ -293,6 +362,17 @@ modules:
             sha256: 22524c74ca47686a61e9d385b66bbb4735b680274f7c7d8ca3c3b6d2877ec00a
       - name: svt-av1
         buildsystem: cmake
+        build-options:
+          arch:
+            x86_64:
+              config-opts:
+                - -DENABLE_AVX512=ON
+        config-opts:
+          - -DCMAKE_BUILD_TYPE=Release
+          - -DBUILD_SHARED_LIBS=ON
+          - -DBUILD_TESTING=OFF
+          - -DBUILD_APPS=OFF
+          - -DBUILD_DEC=OFF
         builddir: true
         sources:
           - type: archive
@@ -301,28 +381,6 @@ modules:
           - type: archive
             url: http://archive.ubuntu.com/ubuntu/pool/universe/s/svt-av1/svt-av1_1.2.1+dfsg-1.debian.tar.xz
             sha256: 42670c9b2e88eff43acbc6380b87008362fa0308ad2f7112224becb1a507204a
-          - type: shell
-            commands:
-              - for n in $(cat patches/series); do if [[ $n != "#"* ]]; then patch -Np1 -i "patches/$n" -d .; fi; done
-      - name: fftw3
-        disabled: false
-        config-opts:
-          - --disable-static
-          - --disable-doc
-          - --enable-shared
-          - --enable-single
-          - --enable-threads
-          - --enable-fortran
-          - --with-our-malloc
-          - --with-combined-threads
-          - --with-incoming-stack-boundary=2
-        sources:
-          - type: archive
-            url: http://archive.ubuntu.com/ubuntu/pool/main/f/fftw3/fftw3_3.3.8.orig.tar.gz
-            sha256: 6113262f6e92c5bd474f2875fa1b01054c4ad5040f6b0da7c03c98821d9ae303
-          - type: archive
-            url: http://archive.ubuntu.com/ubuntu/pool/main/f/fftw3/fftw3_3.3.8-2ubuntu8.debian.tar.xz
-            sha256: 2bddf40b42383167b221d7adfc7937b102b366053c3e6055f3864fb7b98c3050
           - type: shell
             commands:
               - for n in $(cat patches/series); do if [[ $n != "#"* ]]; then patch -Np1 -i "patches/$n" -d .; fi; done
