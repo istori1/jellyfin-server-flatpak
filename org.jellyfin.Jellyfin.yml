@@ -18,16 +18,17 @@ cleanup:
 
 finish-args:
   - --device=dri
-  - --share=network
-  # - --filesystem=host:ro
-  # - --filesystem=home:ro
-  - --filesystem=/mnt:ro
   - --filesystem=/media:ro
+  - --filesystem=/mnt:ro
   - --filesystem=/run/media:ro
-  - --filesystem=xdg-music:ro
-  - --filesystem=xdg-videos:ro
+  - --share=network
+  # - --device=all # Needed for v4l2m2m
+  # - --filesystem=home:ro
+  # - --filesystem=host:ro
   # - --filesystem=xdg-download:ro
+  # - --filesystem=xdg-music:ro
   # - --filesystem=xdg-pictures:ro
+  # - --filesystem=xdg-videos:ro
 
 modules:
   - name: jellyfin-ffmpeg
