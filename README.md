@@ -31,6 +31,7 @@ Setup Flatpak on your distro https://flatpak.org/setup/
 `time flatpak run org.flatpak.Builder --user --install --install-deps-from=flathub-user --disable-cache --force-clean build org.jellyfin.Jellyfin.yml`
 
 <br><br>Create media folders
+
 `mkdir -p ~/.var/app/org.jellyfin.Jellyfin/media/{Movies,Music,Shows,Books,Photos}`
 
 
