@@ -36,3 +36,5 @@ Setup Flatpak on your distro https://flatpak.org/setup/
 
 
 <br><br>Run Jellyfin with `flatpak run org.jellyfin.Jellyfin`
+
+Run Jellyfin in Raspberry Pi with `flatpak run --device=all org.jellyfin.Jellyfin`
