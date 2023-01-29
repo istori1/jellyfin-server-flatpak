@@ -40,6 +40,8 @@ jobs:
           mkdir artifacts
           sudo su $(whoami) -c 'flatpak build-bundle ./repo artifacts/jellyfin_$(uname -m).flatpak org.jellyfin.Jellyfin'
           sudo su $(whoami) -c 'flatpak build-bundle --runtime ./repo artifacts/jellyfin_debug_$(uname -m).flatpak org.jellyfin.Jellyfin.Debug'
+          sudo su $(whoami) -c 'flatpak build-bundle --runtime --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo \
+          ~/.local/share/flatpak/repo artifacts/org.freedesktop.Platform_22.08_$(uname -m).flatpak org.freedesktop.Platform 22.08'
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v3
