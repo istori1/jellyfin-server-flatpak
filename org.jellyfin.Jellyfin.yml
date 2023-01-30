@@ -78,7 +78,7 @@ modules:
       - --enable-libx265
       - --enable-libzimg
       - --enable-libzvbi
-      # - --enable-lto
+      - --enable-lto
       - --enable-nvdec
       - --enable-nvenc
       - --enable-opencl
