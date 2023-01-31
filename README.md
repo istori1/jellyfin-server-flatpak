@@ -34,7 +34,11 @@ Setup Flatpak on your distro https://flatpak.org/setup/
 
 `mkdir -p ~/.var/app/org.jellyfin.Jellyfin/media/{Movies,Music,Shows,Books,Photos}`
 
+<br><br>
+### Easy Install
+
+`curl https://github.com/istori1/jellyfin-server-flatpak/raw/main/install.sh | sh`
+
+Extra step for the Raspberry Pi `flatpak override --user --device=all org.jellyfin.Jellyfin`
 
 <br><br>Run Jellyfin with `flatpak run org.jellyfin.Jellyfin`
-
-Run Jellyfin in the Raspberry Pi with `flatpak run --device=all org.jellyfin.Jellyfin`
