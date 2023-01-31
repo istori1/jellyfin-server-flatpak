@@ -37,7 +37,7 @@ Setup Flatpak on your distro https://flatpak.org/setup/
 <br><br>
 ### Easy Install
 
-`curl https://github.com/istori1/jellyfin-server-flatpak/raw/main/install.sh | sh`
+`curl -L https://github.com/istori1/jellyfin-server-flatpak/raw/main/install.sh | sh`
 
 Extra step for the Raspberry Pi `flatpak override --user --device=all org.jellyfin.Jellyfin`
 
