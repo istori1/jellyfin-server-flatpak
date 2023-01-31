@@ -3,7 +3,7 @@ URL="https://github.com/istori1/jellyfin-server-flatpak/releases/download"
 
 if [ "$(which flatpak)" = "" ]; then
 
-  echo Could not find flatpak in the host.
+  echo Could not find flatpak on the host.
   echo Set up flatpak on your distro: https://flatpak.org/setup/
 
 else
