@@ -29,11 +29,15 @@ else
   # Delele bundle file
   rm /tmp/jellyfin.flatpak
   
-  mkdir -p ~/.config/systemd/user
-  mkdir -p ~/.var/app/org.jellyfin.Jellyfin/media/{Movies,Music,Shows,Books,Photos}
+  mkdir -p ~/.var/app/org.jellyfin.Jellyfin/media/Movies
+  mkdir -p ~/.var/app/org.jellyfin.Jellyfin/media/Music
+  mkdir -p ~/.var/app/org.jellyfin.Jellyfin/media/Shows
+  mkdir -p ~/.var/app/org.jellyfin.Jellyfin/media/Books
+  mkdir -p ~/.var/app/org.jellyfin.Jellyfin/media/Photos
 
 fi
 
+# mkdir -p ~/.config/systemd/user
 # systemctl --user enable --now jellyfin
 # loginctl enable-linger $USER
 
