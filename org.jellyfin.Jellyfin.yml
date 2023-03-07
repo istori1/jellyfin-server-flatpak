@@ -314,11 +314,11 @@ modules:
         # Using lunar source for 22.08 SDK in aarch64
         sources:
           - type: archive
-            url: http://archive.ubuntu.com/ubuntu/pool/universe/z/zvbi/zvbi_0.2.39.orig.tar.gz
-            sha256: 290e44835af02159be6a2f670f3f0232a5da89ad27eaa2eab2d9ef3ba04a4bd1
+            url: http://archive.ubuntu.com/ubuntu/pool/universe/z/zvbi/zvbi_0.2.41.orig.tar.gz
+            sha256: 2f22f9846bceead26349dd0b026cd41b638171eca2af98e69fe6762b98cbcd87
           - type: archive
-            url: http://archive.ubuntu.com/ubuntu/pool/universe/z/zvbi/zvbi_0.2.39-2.debian.tar.xz
-            sha256: 6af666ea46d300e8ce60aeafde66cb51ebe06539a73776c28f1f7e78bce0296a
+            url: http://archive.ubuntu.com/ubuntu/pool/universe/z/zvbi/zvbi_0.2.41-1.debian.tar.xz
+            sha256: 4a8767a1fb6fcfdcf9da21945a33de9c9cfac3ebfa4222929a043fabc1110492
           - type: shell
             commands:
               - for n in $(cat patches/series); do if [[ $n != "#"* ]]; then patch -Np1 -i "patches/$n" -d .; fi; done
