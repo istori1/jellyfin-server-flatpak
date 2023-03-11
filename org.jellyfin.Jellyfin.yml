@@ -314,6 +314,7 @@ modules:
         # Using lunar source for 22.08 SDK in aarch64
         sources:
           - type: archive
+            strip-components: 2
             url: http://archive.ubuntu.com/ubuntu/pool/universe/z/zvbi/zvbi_0.2.41.orig.tar.gz
             sha256: 2f22f9846bceead26349dd0b026cd41b638171eca2af98e69fe6762b98cbcd87
           - type: archive
